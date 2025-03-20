@@ -34,9 +34,10 @@ async def handle_post(request):
         data = await request.json()
         text = data.get("text", "")
         image = pipeline(text).images[0]
-        image.save(text)
 
         image_filename=text+'.png'
+        image.save(image_filename)
+        
         print(f"Received text: {image_filename}") 
 
         image_path = os.path.join(IMAGE_DIR, image_filename)
