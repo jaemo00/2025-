@@ -1,12 +1,20 @@
 from aiohttp import web
-import json
 import pathlib
 import os
-from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionPipeline
+import torch
+
+pipe = StableDiffusionPipeline.from_single_file(
+    "C:/Users/AhnLab/Desktop/DreamShaper_8.safetensors",  # DreamShaper 파일 경로
+    torch_dtype=torch.float16,
+    safety_checker=None,  # 필요 시 꺼줄 수 있음
+)
+pipe = pipe.to("cuda")
+
+generator = torch.manual_seed(33)
 
 
-pipeline = DiffusionPipeline.from_pretrained("stable-diffusion-v1-5/stable-diffusion-v1-5")
-pipeline.to("cuda")
+#pipe.load_lora_weights("C:/Users/AhnLab/Desktop/sd1.5.safetensors",weight_name="default", lora_scale=0.7) #0.5~1
 
 
 
@@ -20,11 +28,6 @@ async def serve_html(request):
     return web.FileResponse(BASE_DIR/"index.html")
 
 
-@routes.get('/image')
-async def serve_image(request):
-    return web.FileResponse(BASE_DIR/"image_of_squirrel_painting.png")
-
-
 @routes.post("/submit")
 async def handle_post(request):
     """클라이언트에서 JSON 데이터를 받아 응답하는 핸들러"""
@@ -33,7 +36,7 @@ async def handle_post(request):
 
         data = await request.json()
         text = data.get("text", "")
-        image = pipeline(text).images[0]
+        image = pipe(text, generator=generator, num_inference_steps=30).images[0]
 
         image_filename=text+'.png'
         image.save(image_filename)
