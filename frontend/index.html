@@ -1,0 +1,52 @@
+<!doctype html>
+  <head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>이미지 생성</title>
+
+
+    <script>
+        async function sendText() {
+            const inputText = document.getElementById("textInput").value;
+
+            const response = await fetch("/submit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: inputText })
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                document.getElementById("image").src = "/static/" + result.image_url;  // 이미지 업데이트
+                document.getElementById("image").style.display = "block";  // 이미지 표시
+            }
+        }
+    </script>
+
+
+
+  </head>
+
+
+ <body>
+
+
+    <h2>텍스트 입력 후 이미지를 확인하세요</h2>
+    <input type="text" id="textInput" placeholder="예: 고양이, 강아지, 사과, 바다">
+    <button onclick="sendText()">전송</button>
+    
+    <br><br>
+    <img id="image" src="" alt="이미지 없음" style="display: none; max-width: 300px;">
+
+
+
+  </body>
+</html>
+
+
